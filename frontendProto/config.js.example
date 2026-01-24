@@ -1,0 +1,14 @@
+// Configuration file
+// Copy this file to config.js and add your actual API key
+// Add config.js to .gitignore to keep your key private
+//
+// Usage:
+// 1. Copy this file: cp config.js.example config.js
+// 2. Edit config.js and add your Giphy API key
+// 3. The app will automatically load config.js if it exists
+
+const USER_CONFIG = {
+    GIPHY_API_KEY: 'your-actual-giphy-api-key-here',
+    // You can override other config values here if needed
+    // Example: MAX_FILE_SIZE: 400 * 1024,
+};

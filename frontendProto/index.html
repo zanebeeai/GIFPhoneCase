@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIFCase Controller</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 GIFCase Controller</h1>
+            <p class="subtitle">Search Giphy, process, and send GIFs to your ESP32-S3</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Search Section -->
+            <section class="search-section">
+                <div class="search-box">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Search for GIFs on Giphy..."
+                        autocomplete="off"
+                    >
+                    <button id="searchBtn">Search</button>
+                </div>
+                <div id="gifResults" class="gif-results"></div>
+            </section>
+
+            <!-- Preview & Processing Section -->
+            <section class="preview-section">
+                <h2>Selected GIF</h2>
+                <div id="selectedGifContainer" class="selected-gif-container">
+                    <p class="placeholder">Select a GIF from search results</p>
+                </div>
+                <div id="processingStatus" class="processing-status"></div>
+                <div id="previewContainer" class="preview-container">
+                    <h3>Processed Preview (240px width)</h3>
+                    <div id="previewGif" class="preview-gif"></div>
+                    <div id="gifInfo" class="gif-info"></div>
+                </div>
+            </section>
+
+            <!-- BLE Connection Section -->
+            <section class="ble-section">
+                <h2>ESP32 Connection</h2>
+                <div class="ble-controls">
+                    <button id="connectBtn" class="btn-primary">Connect to GIFCase</button>
+                    <button id="disconnectBtn" class="btn-secondary" disabled>Disconnect</button>
+                    <div id="connectionStatus" class="connection-status">Not connected</div>
+                </div>
+                <div class="upload-controls">
+                    <button id="uploadBtn" class="btn-primary" disabled>Upload & Play</button>
+                    <button id="replayBtn" class="btn-secondary" disabled>Replay on ESP32</button>
+                    <div id="uploadProgress" class="upload-progress"></div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js"></script>
+    <!-- Using omggif for GIF decoding - more reliable than gifuct-js -->
+    <script src="https://cdn.jsdelivr.net/npm/omggif@1.0.10/omggif.js"></script>
+    <script>
+        // Debug: Check if omggif loaded
+        window.addEventListener('load', function() {
+            console.log('omggif check:', {
+                'GifReader': typeof GifReader,
+                'window.GifReader': typeof window.GifReader,
+                'omggif': typeof omggif
+            });
+        });
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>
