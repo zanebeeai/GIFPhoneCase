@@ -59,6 +59,7 @@ static BLECharacteristic* statChr = nullptr;
 
 // Cached status (for READ)
 static String lastStatus = "BOOT";
+static bool bleConnected = false;
 
 // Throttles
 static uint32_t lastProgMs = 0;
@@ -93,6 +94,78 @@ static int32_t GIFSeekFile(GIFFILE *pFile, int32_t iPosition) {
   f->seek(iPosition);
   pFile->iPos = iPosition;
   return iPosition;
+}
+
+// ===================== Display update =====================
+static void updateDisplay() {
+  tft.fillScreen(TFT_BLACK);
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  tft.setTextSize(2);
+  tft.setCursor(0, 0);
+
+  // Title
+  tft.println("GIFCase");
+  tft.println("");
+
+  // Connection status (use tracked state, not just lastStatus)
+  if (bleConnected) {
+    tft.setTextColor(TFT_GREEN, TFT_BLACK);
+    tft.println("BLE: Connected");
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  } else {
+    tft.setTextColor(TFT_YELLOW, TFT_BLACK);
+    tft.println("BLE: Advertising");
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  }
+  tft.println("");
+
+  // Upload progress
+  if (rxActive && rxExpected > 0) {
+    uint32_t percent = (rxCount * 100) / rxExpected;
+    tft.setTextColor(TFT_CYAN, TFT_BLACK);
+    tft.print("Upload: ");
+    tft.print(percent);
+    tft.println("%");
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.print(rxCount / 1024);
+    tft.print(" / ");
+    tft.print(rxExpected / 1024);
+    tft.println(" KB");
+    tft.println("");
+  }
+
+  // Status message
+  if (lastStatus.startsWith("OK:rx_done") || lastStatus.startsWith("OK:rx_done_auto")) {
+    tft.setTextColor(TFT_GREEN, TFT_BLACK);
+    tft.println("Upload Complete!");
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  } else if (lastStatus.startsWith("ERR:")) {
+    tft.setTextColor(TFT_RED, TFT_BLACK);
+    tft.println("Error:");
+    tft.println(lastStatus.substring(4));
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  } else if (lastStatus.startsWith("OK:played")) {
+    tft.setTextColor(TFT_GREEN, TFT_BLACK);
+    tft.println("Playback Done");
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  } else if (playRequested) {
+    tft.setTextColor(TFT_CYAN, TFT_BLACK);
+    tft.println("Playing GIF...");
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  }
+
+  // File info
+  uint32_t fileSz = spiffsFileSize("/gif.gif");
+  if (fileSz > 0) {
+    tft.println("");
+    tft.setTextSize(1);
+    tft.setTextColor(TFT_DARKGREY, TFT_BLACK);
+    tft.print("File: ");
+    tft.print(fileSz / 1024);
+    tft.println(" KB");
+    tft.setTextSize(2);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  }
 }
 
 // ===================== Status helpers =====================
@@ -239,10 +312,12 @@ static inline void rxFinishAndValidate(const char* okTag) {
 class ServerCallbacks : public BLEServerCallbacks {
   void onConnect(BLEServer*) override {
     Serial.println("BLE connected");
+    bleConnected = true;
     setStatus("OK:connected");
   }
   void onDisconnect(BLEServer*) override {
     Serial.println("BLE disconnected -> restart advertising");
+    bleConnected = false;
     BLEDevice::startAdvertising();
     setStatus("OK:adv", false);
   }
@@ -433,7 +508,7 @@ void setup() {
   digitalWrite(PIN_BL, HIGH);
 
   tft.init();
-  tft.setRotation(1);
+  tft.setRotation(3);  // Rotated 180 degrees from rotation 1
   tft.setSwapBytes(true);
   tft.fillScreen(TFT_BLACK);
 
@@ -441,7 +516,7 @@ void setup() {
   tft.setTextSize(2);
   tft.setCursor(0, 0);
   tft.println("GIFCase");
-  tft.println("Waiting BLE...");
+  tft.println("Initializing...");
 
   gif.begin(LITTLE_ENDIAN_PIXELS);
 
@@ -449,12 +524,41 @@ void setup() {
 }
 
 void loop() {
+  // Update display only when state changes (to prevent flickering)
+  static String lastDisplayedStatus = "";
+  static bool lastDisplayedRxActive = false;
+  static uint32_t lastDisplayedRxCount = 0;
+  static bool lastDisplayedBleConnected = false;
+  static uint32_t lastDisplayCheck = 0;
+  
+  uint32_t now = millis();
+  bool needsUpdate = false;
+  
+  // Check if anything changed that requires display update
+  if (lastStatus != lastDisplayedStatus ||
+      rxActive != lastDisplayedRxActive ||
+      (rxActive && rxCount != lastDisplayedRxCount && (now - lastDisplayCheck > 200)) ||
+      bleConnected != lastDisplayedBleConnected) {
+    needsUpdate = true;
+  }
+  
+  if (needsUpdate) {
+    lastDisplayCheck = now;
+    lastDisplayedStatus = lastStatus;
+    lastDisplayedRxActive = rxActive;
+    lastDisplayedRxCount = rxCount;
+    lastDisplayedBleConnected = bleConnected;
+    updateDisplay();
+  }
+
   if (playRequested) {
     playRequested = false;
     stopPlayback  = false;
 
     tft.fillScreen(TFT_BLACK);
     tft.setCursor(0, 0);
+    tft.setTextColor(TFT_CYAN, TFT_BLACK);
+    tft.setTextSize(2);
     tft.println("Playing...");
 
     uint32_t tStart = millis();
@@ -473,9 +577,6 @@ void loop() {
       yield();
     }
 
-    tft.fillScreen(TFT_BLACK);
-    tft.setCursor(0, 0);
-    tft.println("Done. Send GIF.");
     setStatus("OK:played");
   }
 
