@@ -42,6 +42,21 @@ header h1 {
     padding: 30px;
 }
 
+/* iOS Warning Banner */
+.ios-warning {
+    background: #ff9800;
+    color: white;
+    padding: 15px 30px;
+    margin: 0;
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.ios-warning strong {
+    font-weight: 600;
+}
+
 section {
     margin-bottom: 40px;
 }
@@ -50,6 +65,140 @@ section h2 {
     color: #667eea;
     margin-bottom: 20px;
     font-size: 1.5em;
+}
+
+/* Custom Upload Section */
+.custom-upload-section {
+    margin-bottom: 40px;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 12px;
+    border: 2px solid #e0e0e0;
+}
+
+.upload-options {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.upload-option {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.upload-label {
+    display: inline-block;
+    padding: 12px 24px;
+    background: #667eea;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    font-weight: 600;
+    transition: background 0.3s;
+    user-select: none;
+}
+
+.upload-label:hover {
+    background: #5568d3;
+}
+
+.upload-label span {
+    pointer-events: none;
+}
+
+.file-name {
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+    font-style: italic;
+}
+
+.upload-divider {
+    text-align: center;
+    color: #999;
+    font-weight: 600;
+    font-size: 14px;
+    position: relative;
+}
+
+.upload-divider::before,
+.upload-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background: #ddd;
+}
+
+.upload-divider::before {
+    left: 0;
+}
+
+.upload-divider::after {
+    right: 0;
+}
+
+.url-input-group {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+#urlInput {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+#urlInput:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+#loadUrlBtn {
+    padding: 12px 24px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+    white-space: nowrap;
+}
+
+#loadUrlBtn:hover:not(:disabled) {
+    background: #5568d3;
+}
+
+#loadUrlBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.upload-error {
+    margin-top: 15px;
+    padding: 12px 16px;
+    background: #ffebee;
+    color: #c62828;
+    border-radius: 8px;
+    border: 1px solid #ef5350;
+    display: none;
+    font-size: 14px;
+}
+
+.upload-error.active {
+    display: block;
 }
 
 /* Search Section */

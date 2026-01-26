@@ -12,10 +12,44 @@
             <h1>🎬 GIFCase Controller</h1>
             <p class="subtitle">Search Giphy, process, and send GIFs to your ESP32-S3</p>
         </header>
+        
+        <!-- iOS Warning Banner -->
+        <div id="iosWarning" class="ios-warning" style="display: none;">
+            <strong>⚠️ iOS Limitation:</strong> Web Bluetooth is not supported on iPhone/iPad. 
+            Please use an Android device with Chrome/Edge, or a computer with Chrome/Edge to connect to your ESP32.
+        </div>
 
         <div class="main-content">
+            <!-- Custom Upload Section -->
+            <section class="custom-upload-section">
+                <h2>Upload Custom GIF/Image</h2>
+                <div class="upload-options">
+                    <div class="upload-option">
+                        <label for="fileInput" class="upload-label">
+                            <span>📁 Choose File</span>
+                            <input type="file" id="fileInput" accept="image/gif,image/jpeg,image/jpg,image/png,image/webp" style="display: none;">
+                        </label>
+                        <span class="file-name" id="fileName">No file selected</span>
+                    </div>
+                    <div class="upload-divider">OR</div>
+                    <div class="upload-option">
+                        <div class="url-input-group">
+                            <input 
+                                type="url" 
+                                id="urlInput" 
+                                placeholder="Enter image/GIF URL..."
+                                autocomplete="off"
+                            >
+                            <button id="loadUrlBtn">Load from URL</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="uploadError" class="upload-error"></div>
+            </section>
+
             <!-- Search Section -->
             <section class="search-section">
+                <h2>Search Giphy</h2>
                 <div class="search-box">
                     <input 
                         type="text" 
@@ -72,6 +106,21 @@
             });
         });
     </script>
+    <script src="https://unpkg.com/gifuct-js@2.1.2/dist/gifuct.min.js"></script>
+    <script>
+        // Debug: Check if gifuct-js loaded
+        window.addEventListener('load', function() {
+            console.log('gifuct-js check:', {
+                'parseGIF': typeof parseGIF,
+                'decompressFrames': typeof decompressFrames,
+                'window.parseGIF': typeof window.parseGIF,
+                'window.decompressFrames': typeof window.decompressFrames,
+                'gifuct': typeof gifuct,
+                'gifuct.parseGIF': typeof (window.gifuct && window.gifuct.parseGIF)
+            });
+        });
+    </script>
+
     <script src="app.js"></script>
 </body>
 </html>
